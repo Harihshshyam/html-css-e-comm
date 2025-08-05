@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
@@ -17,22 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js (if Node project)
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run tests
-        run: npm test
-
       - name: Archive artifact
         uses: actions/upload-artifact@v4
         with:
           name: build-output
-          path: 'dist'  # जैसे build/, dist/, आदि
+          path: './html-css-e-comm'
 
   deploy_production:
     name: Deploy to Production
@@ -51,8 +37,6 @@ jobs:
 
       - name: Deploy build
         run: |
-          # उदाहरण के लिए SSH से सर्वर पर कॉपी करना
-          scp -r ./deploy ubuntu@${{ secrets.SERVER_IP }}:/var/www/html/
+          scp -r ./deploy/* ubuntu@${{ secrets.SERVER_IP }}:/var/www/html/
         env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
-

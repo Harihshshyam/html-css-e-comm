@@ -611,3 +611,19 @@
     flex-direction: column;
   }
 }
+
+/* Navbar को सबसे ऊपर लाने के लिए */
+header,
+.shop-menu {
+  position: relative;
+  z-index: 9999;
+}
+
+/* Banner एवं wrapper को non-clickable और नीचे ले जाकर NavbarClickable बनाना */
+.full-banner-warapper,
+.banner {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+

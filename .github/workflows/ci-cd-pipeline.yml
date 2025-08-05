@@ -1,0 +1,58 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build_and_test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js (if Node project)
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Archive artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-output
+          path: '[path/to/build]'  # जैसे build/, dist/, आदि
+
+  deploy_production:
+    name: Deploy to Production
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build-output
+          path: ./deploy
+
+      - name: Deploy build
+        run: |
+          # उदाहरण के लिए SSH से सर्वर पर कॉपी करना
+          scp -r ./deploy ubuntu@${{ secrets.SERVER_IP }}:/var/www/html/
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+

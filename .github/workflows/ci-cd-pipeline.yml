@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -14,11 +17,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Archive artifact
+      # अगर कोई build command हो, ओसे uncomment करें:
+      # - name: Build project
+      #   run: npm run build  # या कोई custom build step
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: build-output
-          path: './html-css-e-comm'
+          path: html-css-e-comm
 
   deploy_production:
     name: Deploy to Production
@@ -33,10 +40,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-output
-          path: ./deploy
+          path: deploy
 
-      - name: Deploy build
-        run: |
-          scp -r ./deploy/* ubuntu@${{ secrets.SERVER_IP }}:/var/www/html/
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
+      - name: Deploy via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}           # आपके सर्वर IP
+          username: ${{ secrets.SERVER_USER }}      # जैसे ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}       # SSH private key from secrets
+          port: 22
+          source: "deploy/html-css-e-comm/**"       # artifact extract folder
+          target: "/var/www/html"                   # remote server web root
